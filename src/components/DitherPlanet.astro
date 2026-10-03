@@ -1,0 +1,182 @@
+---
+// Elemento assinatura do index: um planeta em pixel art com dithering ordenado
+// (matriz de Bayer), desenhado em um <canvas> de baixa resolução e ampliado
+// sem suavização. A luz segue o ponteiro; uma pequena lua orbita o planeta.
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<canvas
+  data-dither-planet
+  width="56"
+  height="56"
+  aria-hidden="true"
+  class:list={['dither-planet select-none', className]}></canvas>
+
+<style>
+  .dither-planet {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+</style>
+
+<script>
+  const RES = 56; // resolução interna (pixels "de verdade" do pixel art)
+  const RADIUS = 20; // raio do planeta, em pixels
+  const SPIN = 0.22; // velocidade de rotação (rad/s)
+
+  // Matriz de Bayer 4x4 normalizada (dithering ordenado)
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-dither-planet]');
+  const ctx = canvas?.getContext('2d');
+
+  if (canvas && ctx) {
+    const image = ctx.createImageData(RES, RES);
+    const center = RES / 2;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Cores lidas das variáveis do tema (atualizam quando o tema muda)
+    let accent: [number, number, number] = [142, 153, 246];
+    let fg: [number, number, number] = [241, 242, 244];
+    const readColors = () => {
+      const styles = getComputedStyle(document.documentElement);
+      accent = hexToRgb(styles.getPropertyValue('--accent')) ?? accent;
+      fg = hexToRgb(styles.getPropertyValue('--fg')) ?? fg;
+    };
+    readColors();
+    new MutationObserver(() => {
+      readColors();
+      if (reducedMotion) draw(performance.now());
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // Direção da luz: segue o ponteiro com suavização; sem ponteiro, orbita sozinha
+    let light = normalize(-0.6, -0.5, 0.65);
+    let target = light;
+    let pointerActive = false;
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const dx = (e.clientX - (rect.left + rect.width / 2)) / 300;
+        const dy = (e.clientY - (rect.top + rect.height / 2)) / 300;
+        target = normalize(dx, dy, 0.7);
+        pointerActive = true;
+        if (reducedMotion) {
+          light = target;
+          draw(performance.now());
+        }
+      },
+      { passive: true },
+    );
+
+    function draw(now: number) {
+      const t = now / 1000;
+      if (!pointerActive) target = normalize(Math.cos(t * 0.3) * 0.8, -0.45, 0.65);
+      light = normalize(
+        light[0] + (target[0] - light[0]) * 0.08,
+        light[1] + (target[1] - light[1]) * 0.08,
+        light[2] + (target[2] - light[2]) * 0.08,
+      );
+
+      const data = image.data;
+      data.fill(0);
+      const rotation = reducedMotion ? 0.6 : t * SPIN;
+
+      for (let py = 0; py < RES; py++) {
+        for (let px = 0; px < RES; px++) {
+          const x = (px + 0.5 - center) / RADIUS;
+          const y = (py + 0.5 - center) / RADIUS;
+          const d2 = x * x + y * y;
+          if (d2 > 1) continue;
+
+          const z = Math.sqrt(1 - d2);
+          const i = (py * RES + px) * 4;
+          data[i] = accent[0];
+          data[i + 1] = accent[1];
+          data[i + 2] = accent[2];
+
+          // Iluminação difusa + um pouco de luz ambiente
+          const diffuse = Math.max(0, x * light[0] + y * light[1] + z * light[2]);
+
+          // "Continentes": padrão em coordenadas esféricas que gira com o tempo
+          const lon = Math.atan2(x, z) + rotation;
+          const lat = Math.asin(y);
+          const field =
+            Math.sin(4 * lon + 2 * Math.sin(3 * lat)) * Math.cos(3 * lat + 0.8 * Math.sin(5 * lon));
+          const land = field > 0.2;
+
+          const intensity = 0.1 + diffuse * (land ? 1.05 : 0.7);
+          if (intensity > BAYER[(py % 4) * 4 + (px % 4)]) {
+            data[i + 3] = land ? 255 : 150;
+          } else if (d2 > 0.84) {
+            // Contorno discreto no lado escuro, para a silhueta da esfera aparecer
+            data[i + 3] = 60;
+          }
+        }
+      }
+
+      // Lua: orbita inclinada; some atrás do planeta quando está "do outro lado"
+      const angle = rotation * 2.4;
+      const mx = Math.round(center + Math.cos(angle) * 26);
+      const my = Math.round(center + Math.sin(angle) * 7);
+      const behind = Math.sin(angle) < 0 && (mx - center) ** 2 + (my - center) ** 2 < RADIUS ** 2;
+      if (!behind) {
+        for (const [ox, oy] of [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [1, 1],
+        ]) {
+          const qx = mx + ox;
+          const qy = my + oy;
+          if (qx < 0 || qy < 0 || qx >= RES || qy >= RES) continue;
+          const i = (qy * RES + qx) * 4;
+          data[i] = fg[0];
+          data[i + 1] = fg[1];
+          data[i + 2] = fg[2];
+          data[i + 3] = 255;
+        }
+      }
+
+      ctx!.putImageData(image, 0, 0);
+    }
+
+    // Só anima quando está visível na tela e a aba está aberta
+    let visible = true;
+    let frame = 0;
+    const loop = (now: number) => {
+      draw(now);
+      frame = requestAnimationFrame(loop);
+    };
+    const update = () => {
+      cancelAnimationFrame(frame);
+      if (!reducedMotion && visible && document.visibilityState === 'visible') {
+        frame = requestAnimationFrame(loop);
+      }
+    };
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      update();
+    }).observe(canvas);
+    document.addEventListener('visibilitychange', update);
+
+    draw(performance.now());
+    update();
+  }
+
+  function normalize(x: number, y: number, z: number): [number, number, number] {
+    const len = Math.hypot(x, y, z) || 1;
+    return [x / len, y / len, z / len];
+  }
+
+  function hexToRgb(value: string): [number, number, number] | null {
+    const hex = value.trim().replace('#', '');
+    if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
+    return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
+  }
+</script>

@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import Sep from '../components/Sep.astro';
 import NowPlaying from '../components/NowPlaying.astro';
+import DitherPlanet from '../components/DitherPlanet.astro';
 import { profile } from '../data/profile';
 import { getNotes, getPosts, postSlug } from '../lib/content';
 import { formatDate, formatDay, formatTime } from '../lib/date';
@@ -24,8 +25,13 @@ const notes = await Promise.all(
 
 <BaseLayout lang={lang} description={profile.bio[lang]}>
   <section>
-    <h1 class="text-2xl font-medium tracking-tight text-fg sm:text-[1.75rem]">{profile.name}</h1>
-    <p class="mt-4 max-w-[34rem] text-pretty">{profile.bio[lang]}</p>
+    <div class="grid grid-cols-[1fr_auto] items-center gap-x-6 sm:items-start">
+      <h1 class="text-2xl font-medium tracking-tight sm:mt-1 sm:text-[1.75rem]">
+        <span class="fx">{profile.name}</span>
+      </h1>
+      <DitherPlanet class="-my-6 size-28 sm:row-span-2 sm:my-0 sm:-mt-4 sm:size-42" />
+      <p class="col-span-2 mt-4 max-w-[34rem] text-pretty sm:col-span-1">{profile.bio[lang]}</p>
+    </div>
 
     <dl class="mt-8 grid grid-cols-[6.5rem_1fr] gap-y-1.5 font-mono text-[13px]">
       {
