@@ -162,6 +162,41 @@
   }
 }
 
+/*
+  Efeito de destaque com brilho em gradiente.
+  Uso no Markdown: <span class="fx">texto</span>
+*/
+.fx {
+  background: linear-gradient(
+    100deg,
+    var(--accent) 0%,
+    #c084fc 25%,
+    var(--caution) 50%,
+    #c084fc 75%,
+    var(--accent) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+  animation: fx-shimmer 4s linear infinite;
+}
+
+@keyframes fx-shimmer {
+  to {
+    background-position: -250% 0;
+  }
+}
+
+/* Na impressão, texto normal */
+@media print {
+  .fx {
+    background: none;
+    color: var(--fg);
+  }
+}
+
 /* Shiki: cores do tema claro/escuro (configurado em astro.config.mjs) */
 .astro-code,
 .astro-code span {

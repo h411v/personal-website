@@ -1,26 +1,24 @@
 ---
 title: About
-description: A bit more about me.
+description: The story of how I got here.
 ---
 
-Hi, I'm **Vitor** — a software developer and Computer Science student from São Paulo, Brazil. Online I go by **rotiv**, which is just my name backwards.
+For as long as I can remember, I've liked making things. Technology wasn't on my radar yet. Wi-Fi already existed back then, but at home our internet came from an *internet stick*, a carrier SIM that had to be topped up like a phone, so we didn't get to use it much.
 
-## How I got here
+Our first computer was a Positivo my dad bought, with a glorious 2 GB of RAM and an Intel Atom from the *Pineview* line. That was it. On it I played Age of Empires II and Diablo II, made stick-figure animations in Pivot 5 (which was all the rage) and drew with a graphics tablet. Around the same time I had a "comedy" channel on YouTube, where I turned random school topics into videos shot and edited on my phone, in a copy of KineMaster Pro acquired through *alternative means*. Editing video on that PC was a joke: it already took forever to boot, let alone render.
 
-I wrote my first lines of code when I was 13, out of pure curiosity, and never really stopped. By 2019 I was taking on small projects as a freelancer, learning mostly by building things and breaking them. For a while code was something I did on the side: I worked as a parking operator at Estapar — where I was promoted to the camera monitoring center after a few months — and later as an administrative assistant.
+That's roughly when I discovered game development, thanks to the people who went from classroom to classroom advertising courses. I found a gem called RPG Maker VX Ace and spent hours in it and watching videos about it. But I soon felt limited to top-down pixel art RPGs. I wanted to make platformers, 3D games. I found Unity, which obviously didn't run on my computer. With my unlimited knowledge at the time, it never crossed my mind to build an engine or use something lighter. I probably thought games could only be made in engines.
 
-In March 2026 I joined **BR GAAP**, where I build complete enterprise management systems with SAPUI5, C# and MongoDB. The same year I started my degree in Computer Science at UNIP, to fill in the theory behind what I'd been doing in practice.
+You can guess what came next: I started learning programming languages, and the first one was Python. I wrote my first line of code when I was 10, and it was the coolest feeling I've had to this day. It's hard to explain. I was so happy I wanted to show the whole world my `print("Hello, World!")`. I felt like a <span class="fx">wizard</span>.
 
-## What I'm into
+With that came a taste for math (I plan to get a degree in it too someday) and the urge to learn more. The problem was that my computer could barely run Chrome. I searched "how to make my PC faster" and, out of nowhere, found Linux. My first distro was Ubuntu, and I used it for a long, long time. During that period I fell into the JavaScript trap and stayed stuck there for quite a while. I only "broke free" when I switched distros and went straight to C. I wanted to understand how things work at a low level: compilation, assembly, memory allocation, addressing, bitwise operations. I'm still fascinated by that part.
 
-I like understanding how things work under the hood. That's a big part of why I use **Arch Linux** with **Sway**, write code in **Neovim**, and type on a split keyboard — every piece of my setup is something I chose and configured myself. You can see all of it on the [uses](/uses) page.
+Later I got a new PC, and this one was insane: a GTX 1050 Ti, an Athlon 200GE and 8 GB of RAM. Now I could finally make all sorts of games in Unity, right? Wrong. I spent ages 17 to 18 playing everything I'd never been able to play, and got seriously hooked on LoL and Valorant around its launch.
 
-Outside of code, I'm always looking for new music to listen to.
+At 18 I started working at a shopping mall parking lot and used that time to keep studying. That's when I found my beloved <span class="fx">Arch Linux</span>. For my first install I followed the [wiki](https://wiki.archlinux.org/title/Installation_guide): I woke up at 8 a.m., excited, and only finished at 7 p.m., with the system running perfectly. Well, "perfectly" might be a stretch, but to me it was wonderful. I used it for two hours, then wiped it to install again and explore options I hadn't tried. It's still my favorite distro. As much as I like Gentoo, Arch will always be the main one.
 
-## This site
+From there came the full high-performance programmer package: *Vim*, vim motions everywhere, a split keyboard and so on. I kept going with C and learned other languages, like Ruby, C#, Python, Julia and Lua. It also became clear that I didn't want to work in game dev. As much as I enjoy drawing pixel art and programming games, I accepted that it's a hobby. I started using Godot because it's open source and because the concept of nodes won me over.
 
-This is where I keep my [blog](/blog) for longer writing, my [notes](/notes) for quick thoughts, and my [portfolio](/portfolio) if you want the professional version.
+Today my tastes are the same: Godot, Arch, open source, and Ruby is still my favorite language. Since March 2026 I've worked at BR GAAP as a full stack developer in C#, and I also started my degree in Computer Science. Right now I'm reading *How Linux Works* by Brian Ward, *The Linux Command Line* by William Shotts, and *Structured Computer Organization* by Andrew Tanenbaum. I also have a game in production that I plan to release in June 2027.
 
-## Say hi
-
-The best way to reach me is by email at [vitor.sannctorum@hotmail.com](mailto:vitor.sannctorum@hotmail.com). You can also find me on [GitHub](https://github.com/h411v).
+I hope you enjoyed reading this. I wish I could say more, but who wants to know that much, right? Around the site you'll find the [blog](/blog) and my [quick notes](/notes), where you can get to know me little by little, if you want. Thanks!
