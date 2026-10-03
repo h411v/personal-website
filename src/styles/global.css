@@ -1,0 +1,137 @@
+@import 'tailwindcss';
+@import './prose.css';
+
+/* `dark:` do Tailwind segue o atributo data-theme no <html> (definido pelo ThemeScript) */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ------------------------------------------------------------------
+   Tokens de cor
+   Para trocar a cor de acento, mude só --accent e --accent-soft
+   nos dois temas abaixo.
+   ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light;
+  --bg: #fbfbfa;
+  --surface: #f2f2f0;
+  --border: #e4e4e1;
+  --fg: #111214; /* títulos e destaques */
+  --text: #3b3e45; /* texto corrido */
+  --muted: #6a6e77; /* metadados, links inativos */
+  --subtle: #a3a7ae; /* decoração: pipes, separadores */
+  --accent: #4f5bd5;
+  --accent-soft: rgb(79 91 213 / 0.1);
+  --caution: #d9a21b; /* faixa de obra */
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #101114;
+  --surface: #17181c;
+  --border: #25272d;
+  --fg: #f1f2f4;
+  --text: #b3b7bf;
+  --muted: #7f848e;
+  --subtle: #50545c;
+  --accent: #8e99f6;
+  --accent-soft: rgb(142 153 246 / 0.12);
+  --caution: #e2b443;
+}
+
+/* Fallback caso o JavaScript esteja desligado: segue o sistema */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #101114;
+    --surface: #17181c;
+    --border: #25272d;
+    --fg: #f1f2f4;
+    --text: #b3b7bf;
+    --muted: #7f848e;
+    --subtle: #50545c;
+    --accent: #8e99f6;
+    --accent-soft: rgb(142 153 246 / 0.12);
+    --caution: #e2b443;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-caution: var(--caution);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* Transição suave entre páginas (sem JavaScript) */
+@view-transition {
+  navigation: auto;
+}
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-[15.5px] leading-relaxed text-text antialiased sm:text-base;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  ::selection {
+    @apply bg-accent-soft text-fg;
+  }
+
+  :focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+/* Impressão / "salvar PDF": sempre no tema claro, sem fundo */
+@media print {
+  :root,
+  :root[data-theme='dark'] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #f4f4f2;
+    --border: #e2e2df;
+    --fg: #111214;
+    --text: #2f3238;
+    --muted: #5f636b;
+    --subtle: #a3a7ae;
+    --accent: #3d48b8;
+    --accent-soft: rgb(61 72 184 / 0.15);
+  }
+
+  body {
+    font-size: 11pt;
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

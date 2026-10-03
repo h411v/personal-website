@@ -1,0 +1,59 @@
+---
+// Aviso "em obras" para seções ainda vazias (blog, notas).
+import Sep from './Sep.astro';
+import { localizePath, t, type Lang, type UIKey } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  variant: 'blog' | 'notes';
+  /** Links de "desvio" para outras páginas */
+  detours: { href: string; label: UIKey }[];
+}
+
+const { lang, variant, detours } = Astro.props;
+---
+
+<div class="overflow-hidden rounded-xl border border-border">
+  <div class="caution-tape h-2" aria-hidden="true"></div>
+  <div class="p-6 sm:p-8">
+    <p class="flex flex-wrap items-center gap-x-2.5 font-mono text-xs text-muted">
+      <span class="flex items-center gap-2">
+        <span class="size-1.5 animate-pulse rounded-full bg-caution" aria-hidden="true"></span>
+        {t(lang, 'wip.status')}
+      </span>
+      <Sep />
+      <span>{t(lang, 'wip.eta')}</span>
+    </p>
+    <h2 class="mt-4 text-lg font-medium tracking-tight text-fg">
+      {t(lang, `wip.${variant}.title`)}
+    </h2>
+    <p class="mt-2 max-w-[32rem] text-pretty">{t(lang, `wip.${variant}.text`)}</p>
+    <p class="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs">
+      <span class="text-muted">{t(lang, 'wip.detour')}</span>
+      {
+        detours.map((d, i) => (
+          <>
+            {i > 0 && <Sep />}
+            <a
+              href={localizePath(d.href, lang)}
+              class="text-accent transition-opacity hover:opacity-75"
+            >
+              {t(lang, d.label)} →
+            </a>
+          </>
+        ))
+      }
+    </p>
+  </div>
+  <div class="caution-tape h-2" aria-hidden="true"></div>
+</div>
+
+<style>
+  .caution-tape {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--caution) 0 10px,
+      #16171b 10px 20px
+    );
+  }
+</style>

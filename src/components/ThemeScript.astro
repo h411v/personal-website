@@ -1,0 +1,16 @@
+---
+// Roda antes da página aparecer para não piscar o tema errado.
+---
+
+<script is:inline>
+  (function () {
+    let theme;
+    try {
+      theme = localStorage.getItem('theme');
+    } catch (e) {}
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>

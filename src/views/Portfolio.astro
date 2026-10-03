@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CvSection from '../components/CvSection.astro';
+import Sep from '../components/Sep.astro';
+import { cv, type Localized } from '../data/cv';
+import { formatMonth } from '../lib/date';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const period = (start?: string, end?: string | null) => {
+  if (!start) return '';
+  return `${formatMonth(start, lang)} — ${end ? formatMonth(end, lang) : t(lang, 'cv.present')}`;
+};
+
+const companyName = (company: string | Localized) =>
+  typeof company === 'string' ? company : company[lang];
+
+const contacts = [
+  { label: cv.contact.email, href: `mailto:${cv.contact.email}`, external: false },
+  { label: 'github', href: cv.contact.github, external: true },
+  { label: 'linkedin', href: cv.contact.linkedin, external: true },
+].filter((c) => c.href);
+---
+
+<BaseLayout
+  lang={lang}
+  title={`${cv.name} — ${t(lang, 'portfolio.title')}`}
+  description={cv.summary[lang]}
+>
+  <header class="mb-10 sm:mb-12 print:mb-6">
+    <div class="flex items-start justify-between gap-6">
+      <div>
+        <h1 class="text-2xl font-medium tracking-tight text-fg sm:text-[1.75rem]">{cv.name}</h1>
+        <p class="mt-2 text-muted">{cv.headline[lang]}</p>
+      </div>
+      <button
+        type="button"
+        data-print
+        class="mt-1 shrink-0 rounded-md border border-border px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:bg-surface hover:text-fg print:hidden"
+      >
+        {t(lang, 'cv.print')} ↓
+      </button>
+    </div>
+
+    <div class="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs text-muted">
+      <span>{cv.location[lang]}</span>
+      {
+        contacts.map((c) => (
+          <>
+            <Sep />
+            <a
+              href={c.href}
+              target={c.external ? '_blank' : undefined}
+              rel={c.external ? 'noopener noreferrer' : undefined}
+              class="transition-colors hover:text-fg"
+            >
+              {c.label}
+              {c.external && ' ↗'}
+            </a>
+          </>
+        ))
+      }
+    </div>
+  </header>
+
+  <CvSection title={t(lang, 'cv.summary')}>
+    <p class="text-pretty">{cv.summary[lang]}</p>
+  </CvSection>
+
+  <CvSection title={t(lang, 'cv.experience')}>
+    <div class="space-y-8">
+      {
+        cv.experience.map((job) => (
+          <article class="print:break-inside-avoid">
+            <h3 class="font-medium text-fg">
+              {job.role[lang]}
+              <span class="font-normal text-muted">
+                {' '}
+                ·{' '}
+                {job.url ? (
+                  <a href={job.url} target="_blank" rel="noopener noreferrer" class="hover:text-fg">
+                    {companyName(job.company)} ↗
+                  </a>
+                ) : (
+                  companyName(job.company)
+                )}
+              </span>
+            </h3>
+            <p class="mt-1 flex flex-wrap items-center gap-x-2.5 font-mono text-xs text-muted">
+              <span>{period(job.start, job.end)}</span>
+              {job.location && (
+                <>
+                  <Sep />
+                  <span>{job.location[lang]}</span>
+                </>
+              )}
+            </p>
+            {job.summary && <p class="mt-3">{job.summary[lang]}</p>}
+            {job.highlights && job.highlights.length > 0 && (
+              <ul class="mt-3 space-y-1.5">
+                {job.highlights.map((h) => (
+                  <li class="relative pl-5">
+                    <span aria-hidden="true" class="absolute left-0 text-subtle">
+                      –
+                    </span>
+                    {h[lang]}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {job.stack && job.stack.length > 0 && (
+              <p class="mt-3 font-mono text-xs text-muted">{job.stack.join(' · ')}</p>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </CvSection>
+
+  {
+    cv.otherExperience.length > 0 && (
+      <CvSection title={t(lang, 'cv.otherExperience')}>
+        <ul class="space-y-2">
+          {cv.otherExperience.map((job) => (
+            <li class="flex flex-wrap items-baseline justify-between gap-x-6">
+              <span>
+                <span class="text-fg">{job.role[lang]}</span>
+                <span class="text-muted"> · {job.company}</span>
+              </span>
+              <span class="font-mono text-xs text-muted">{period(job.start, job.end)}</span>
+            </li>
+          ))}
+        </ul>
+      </CvSection>
+    )
+  }
+
+  <CvSection title={t(lang, 'cv.education')}>
+    <div class="space-y-6">
+      {
+        cv.education.map((edu) => (
+          <article>
+            <h3 class="font-medium text-fg">
+              {edu.course[lang]}
+              <span class="font-normal text-muted"> · {edu.school}</span>
+            </h3>
+            <p class="mt-1 flex flex-wrap items-center gap-x-2.5 font-mono text-xs text-muted">
+              {edu.start && <span>{period(edu.start, edu.end)}</span>}
+              {edu.start && edu.note && <Sep />}
+              {edu.note && <span>{edu.note[lang]}</span>}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </CvSection>
+
+  <CvSection title={t(lang, 'cv.skills')}>
+    <dl class="grid gap-y-2 sm:grid-cols-[8rem_1fr]">
+      {
+        cv.skills.map((group) => (
+          <>
+            <dt class="text-muted">{group.label[lang]}</dt>
+            <dd class="mb-2 text-fg sm:mb-0">{group.items.join(' · ')}</dd>
+          </>
+        ))
+      }
+    </dl>
+  </CvSection>
+
+  <CvSection title={t(lang, 'cv.languages')}>
+    <dl class="grid gap-y-2 sm:grid-cols-[8rem_1fr]">
+      {
+        cv.languages.map((l) => (
+          <>
+            <dt class="text-fg">{l.name[lang]}</dt>
+            <dd class="mb-2 text-muted sm:mb-0">{l.level[lang]}</dd>
+          </>
+        ))
+      }
+    </dl>
+  </CvSection>
+
+  <CvSection title={t(lang, 'cv.contact')}>
+    <p>
+      {t(lang, 'cv.contactText')}{' '}
+      <a
+        href={`mailto:${cv.contact.email}`}
+        class="text-accent underline decoration-accent-soft decoration-[1.5px] underline-offset-4 transition-colors hover:decoration-current"
+      >
+        {cv.contact.email}
+      </a>
+    </p>
+  </CvSection>
+</BaseLayout>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>

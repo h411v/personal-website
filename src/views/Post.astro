@@ -1,0 +1,124 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Sep from '../components/Sep.astro';
+import { getPosts, postSlug, readingTime } from '../lib/content';
+import { formatDate } from '../lib/date';
+import { languages, localizePath, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  lang: Lang;
+}
+
+const { post, lang } = Astro.props;
+const { Content } = await render(post);
+const slug = postSlug(post);
+const { title, description, date, updated, tags } = post.data;
+
+// Anterior / próximo (lista vem do mais novo para o mais antigo)
+const posts = await getPosts(lang);
+const index = posts.findIndex((p) => p.id === post.id);
+const newer = posts[index - 1];
+const older = posts[index + 1];
+
+// Seletor de idioma: vai para a tradução se existir, senão para a listagem do blog.
+// `translations` (para o Google) só lista versões que existem de verdade.
+const alternates: Partial<Record<Lang, string>> = {};
+const translations: Partial<Record<Lang, string>> = { [lang]: localizePath(`/blog/${slug}`, lang) };
+for (const code of Object.keys(languages) as Lang[]) {
+  if (code === lang) continue;
+  const translated = (await getPosts(code)).some((p) => postSlug(p) === slug);
+  alternates[code] = localizePath(translated ? `/blog/${slug}` : '/blog', code);
+  if (translated) translations[code] = alternates[code];
+}
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={description}
+  alternates={alternates}
+  translations={translations}
+  article={{ published: date, modified: updated, tags }}
+>
+  <article>
+    <header class="mb-10 sm:mb-12">
+      <a
+        href={localizePath('/blog', lang)}
+        class="font-mono text-xs text-muted transition-colors hover:text-fg"
+      >
+        ← {t(lang, 'nav.blog')}
+      </a>
+
+      <h1
+        class="mt-6 text-[1.75rem] leading-tight font-medium tracking-tight text-balance text-fg sm:text-[2.125rem]"
+      >
+        {title}
+      </h1>
+
+      <div class="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-2 font-mono text-xs text-muted">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <Sep />
+        <span>{readingTime(post.body)} {t(lang, 'blog.minRead')}</span>
+        {
+          tags.length > 0 && (
+            <>
+              <Sep />
+              <span class="flex gap-2">
+                {tags.map((tag) => (
+                  <span>#{tag}</span>
+                ))}
+              </span>
+            </>
+          )
+        }
+        {
+          updated && (
+            <span class="rounded-md bg-accent-soft px-2 py-0.5 text-accent">
+              {t(lang, 'blog.updated')} {formatDate(updated)}
+            </span>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  {
+    (newer || older) && (
+      <nav
+        aria-label={t(lang, 'blog.morePosts')}
+        class="mt-16 grid gap-3 border-t border-border pt-8 sm:grid-cols-2"
+      >
+        {older ? (
+          <a
+            href={localizePath(`/blog/${postSlug(older)}`, lang)}
+            class="group rounded-lg border border-border p-4 transition-colors hover:bg-surface"
+          >
+            <span class="font-mono text-xs text-muted">← {t(lang, 'blog.older')}</span>
+            <span class="mt-1 block text-text transition-colors group-hover:text-fg">
+              {older.data.title}
+            </span>
+          </a>
+        ) : (
+          <span class="hidden sm:block" />
+        )}
+        {newer && (
+          <a
+            href={localizePath(`/blog/${postSlug(newer)}`, lang)}
+            class="group rounded-lg border border-border p-4 text-right transition-colors hover:bg-surface"
+          >
+            <span class="font-mono text-xs text-muted">{t(lang, 'blog.newer')} →</span>
+            <span class="mt-1 block text-text transition-colors group-hover:text-fg">
+              {newer.data.title}
+            </span>
+          </a>
+        )}
+      </nav>
+    )
+  }
+</BaseLayout>

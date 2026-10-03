@@ -1,0 +1,192 @@
+---
+// "Ouvindo agora" via Last.fm (que registra o que você ouve no Spotify).
+// Configuração: usuário em src/data/profile.ts e chave no arquivo .env
+// (PUBLIC_LASTFM_API_KEY). Sem os dois, o componente não aparece.
+import { profile } from '../data/profile';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const user = profile.lastfm.user;
+const apiKey = import.meta.env.PUBLIC_LASTFM_API_KEY ?? '';
+const enabled = Boolean(user && apiKey);
+---
+
+{
+  enabled && (
+    <a
+      data-now-playing
+      data-user={user}
+      data-key={apiKey}
+      data-lang={lang}
+      data-label-now={t(lang, 'np.now')}
+      data-label-last={t(lang, 'np.last')}
+      href={`https://www.last.fm/user/${user}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      hidden
+      class="group mt-8 flex max-w-sm items-center gap-3.5 rounded-lg border border-border p-2.5 pr-4 transition-colors hover:bg-surface"
+    >
+      <div class="relative size-11 shrink-0 overflow-hidden rounded-md bg-surface">
+        <img data-np-cover alt="" width="44" height="44" class="size-full object-cover" hidden />
+        <svg
+          data-np-fallback
+          class="absolute inset-0 m-auto size-5 text-subtle"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <p class="flex items-center gap-2 font-mono text-[11px] text-muted">
+          <span data-np-bars class="np-bars" aria-hidden="true" hidden>
+            <span />
+            <span />
+            <span />
+          </span>
+          <span data-np-label />
+        </p>
+        <p class="truncate text-sm text-fg">
+          <span data-np-track />
+          <span class="text-muted">
+            {' '}
+            · <span data-np-artist />
+          </span>
+        </p>
+      </div>
+    </a>
+  )
+}
+
+<style>
+  .np-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 10px;
+  }
+  .np-bars[hidden] {
+    display: none;
+  }
+  .np-bars span {
+    width: 2px;
+    height: 100%;
+    border-radius: 1px;
+    background: var(--accent);
+    transform-origin: bottom;
+    animation: np-bounce 1s ease-in-out infinite;
+  }
+  .np-bars span:nth-child(2) {
+    animation-delay: -0.4s;
+  }
+  .np-bars span:nth-child(3) {
+    animation-delay: -0.7s;
+  }
+  @keyframes np-bounce {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+</style>
+
+<script>
+  interface LastfmTrack {
+    name: string;
+    url: string;
+    artist: { '#text': string };
+    image?: { size: string; '#text': string }[];
+    '@attr'?: { nowplaying?: string };
+    date?: { uts: string };
+  }
+
+  // Imagem padrão (estrela cinza) que o Last.fm devolve quando não há capa
+  const PLACEHOLDER = '2a96cbd8b46e442fc41c2b86b821562f';
+  const REFRESH_MS = 30_000;
+
+  const root = document.querySelector<HTMLAnchorElement>('[data-now-playing]');
+
+  if (root) {
+    const { user = '', key = '', lang = 'en', labelNow = '', labelLast = '' } = root.dataset;
+    const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
+    const cover = $<HTMLImageElement>('[data-np-cover]');
+    const fallback = $<SVGElement>('[data-np-fallback]');
+    const bars = $<HTMLElement>('[data-np-bars]');
+    const label = $<HTMLElement>('[data-np-label]');
+    const track = $<HTMLElement>('[data-np-track]');
+    const artist = $<HTMLElement>('[data-np-artist]');
+
+    const relative = new Intl.RelativeTimeFormat(lang === 'pt' ? 'pt-BR' : 'en', {
+      numeric: 'auto',
+    });
+
+    const timeAgo = (unixSeconds: number) => {
+      const diff = Math.round((unixSeconds * 1000 - Date.now()) / 1000);
+      const steps: [Intl.RelativeTimeFormatUnit, number][] = [
+        ['day', 86_400],
+        ['hour', 3_600],
+        ['minute', 60],
+      ];
+      for (const [unit, seconds] of steps) {
+        if (Math.abs(diff) >= seconds) return relative.format(Math.round(diff / seconds), unit);
+      }
+      return relative.format(0, 'minute');
+    };
+
+    const render = (t: LastfmTrack) => {
+      const playing = t['@attr']?.nowplaying === 'true';
+      track.textContent = t.name;
+      artist.textContent = t.artist['#text'];
+      bars.hidden = !playing;
+      label.textContent =
+        playing || !t.date ? labelNow : `${labelLast} · ${timeAgo(Number(t.date.uts))}`;
+      root.href = t.url;
+
+      const art = t.image?.find((i) => i.size === 'large')?.['#text'] ?? '';
+      const hasArt = Boolean(art) && !art.includes(PLACEHOLDER);
+      if (hasArt && cover.src !== art) cover.src = art;
+      cover.hidden = !hasArt;
+      fallback.style.display = hasArt ? 'none' : '';
+
+      root.hidden = false;
+    };
+
+    const load = async () => {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const params = new URLSearchParams({
+          method: 'user.getrecenttracks',
+          user,
+          api_key: key,
+          format: 'json',
+          limit: '1',
+        });
+        const res = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const latest: LastfmTrack | undefined = [data?.recenttracks?.track ?? []].flat()[0];
+        if (latest) render(latest);
+      } catch {
+        // Sem rede ou API fora do ar: o card simplesmente não aparece/atualiza
+      }
+    };
+
+    load();
+    setInterval(load, REFRESH_MS);
+    document.addEventListener('visibilitychange', load);
+  }
+</script>

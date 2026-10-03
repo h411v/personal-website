@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import UnderConstruction from '../components/UnderConstruction.astro';
+import { getPostsForListing, postLang, postSlug } from '../lib/content';
+import { localizePath, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const posts = await getPostsForListing(lang);
+
+// Agrupa por ano, mantendo a ordem (mais recente primeiro)
+const years = new Map<number, typeof posts>();
+for (const post of posts) {
+  const year = post.data.date.getUTCFullYear();
+  years.set(year, [...(years.get(year) ?? []), post]);
+}
+
+const monthDay = (date: Date) =>
+  `${String(date.getUTCMonth() + 1).padStart(2, '0')}·${String(date.getUTCDate()).padStart(2, '0')}`;
+---
+
+<BaseLayout lang={lang} title={t(lang, 'blog.title')} description={t(lang, 'blog.description')}>
+  <PageHeader title={t(lang, 'blog.title')} description={t(lang, 'blog.description')} />
+
+  {
+    posts.length === 0 ? (
+      <UnderConstruction
+        lang={lang}
+        variant="blog"
+        detours={[
+          { href: '/portfolio', label: 'nav.portfolio' },
+          { href: '/about', label: 'nav.about' },
+          { href: '/uses', label: 'nav.uses' },
+        ]}
+      />
+    ) : (
+      <div class="space-y-10">
+        {[...years].map(([year, list]) => (
+          <section class="grid gap-2 sm:grid-cols-[4.5rem_1fr] sm:gap-4">
+            <h2 class="font-mono text-xs text-subtle sm:pt-[0.9rem]">{year}</h2>
+            <ul class="-mx-3">
+              {list.map((post) => {
+                const pLang = postLang(post);
+                const foreign = pLang !== lang;
+                return (
+                  <li>
+                    <a
+                      href={localizePath(`/blog/${postSlug(post)}`, pLang)}
+                      hreflang={foreign ? pLang : undefined}
+                      class="group flex items-baseline justify-between gap-6 rounded-md px-3 py-2.5 transition-colors hover:bg-surface"
+                    >
+                      <span class="flex items-baseline gap-2.5 text-text transition-colors group-hover:text-fg">
+                        {post.data.title}
+                        {foreign && (
+                          <span
+                            title={t(lang, 'blog.onlyIn')}
+                            class="rounded border border-border px-1.5 py-px font-mono text-[10px] uppercase text-muted"
+                          >
+                            {pLang}
+                          </span>
+                        )}
+                      </span>
+                      <time
+                        datetime={post.data.date.toISOString()}
+                        class="shrink-0 font-mono text-xs text-muted"
+                      >
+                        {monthDay(post.data.date)}
+                      </time>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    )
+  }
+</BaseLayout>

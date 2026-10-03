@@ -1,0 +1,88 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Sep from '../components/Sep.astro';
+import UnderConstruction from '../components/UnderConstruction.astro';
+import { getNotes } from '../lib/content';
+import { formatDay, formatTime } from '../lib/date';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const notes = await Promise.all(
+  (await getNotes()).map(async (note) => ({ note, Content: (await render(note)).Content })),
+);
+const count = `${notes.length} ${t(lang, notes.length === 1 ? 'notes.one' : 'notes.many')}`;
+---
+
+<BaseLayout lang={lang} title={t(lang, 'notes.title')} description={t(lang, 'notes.description')}>
+  <PageHeader title={t(lang, 'notes.title')} description={t(lang, 'notes.description')}>
+    {notes.length > 0 && <p class="mt-4 font-mono text-xs text-subtle">{count}</p>}
+  </PageHeader>
+
+  {
+    notes.length === 0 ? (
+      <UnderConstruction
+        lang={lang}
+        variant="notes"
+        detours={[
+          { href: '/about', label: 'nav.about' },
+          { href: '/portfolio', label: 'nav.portfolio' },
+        ]}
+      />
+    ) : (
+      <ol class="divide-y divide-border">
+        {notes.map(({ note, Content }) => (
+          <li
+            id={note.id}
+            class="group grid scroll-mt-8 gap-1.5 py-6 first:pt-0 sm:grid-cols-[9.5rem_1fr] sm:gap-6"
+          >
+            <a
+              href={`#${note.id}`}
+              class="flex items-center gap-2 self-start font-mono text-xs text-muted transition-colors hover:text-fg sm:pt-[0.3rem]"
+            >
+              <time datetime={note.data.date.toISOString()}>
+                {formatDay(note.data.date)}
+              </time>
+              <Sep />
+              <span>{formatTime(note.data.date)}</span>
+            </a>
+            <div class="note-body min-w-0 text-text">
+              <Content />
+            </div>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .note-body :global(p + p) {
+    margin-top: 0.75rem;
+  }
+  .note-body :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-soft);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.15s;
+  }
+  .note-body :global(a:hover) {
+    text-decoration-color: currentColor;
+  }
+  .note-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+    background: var(--surface);
+  }
+  li:target :global(.note-body) {
+    color: var(--fg);
+  }
+</style>

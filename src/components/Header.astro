@@ -1,0 +1,75 @@
+---
+import Sep from './Sep.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { languages, localizePath, stripLang, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Para onde o seletor de idioma leva, quando não for a mesma rota no outro idioma */
+  alternates?: Partial<Record<Lang, string>>;
+}
+
+const { lang, alternates = {} } = Astro.props;
+const currentPath = stripLang(Astro.url.pathname).replace(/\/$/, '') || '/';
+
+const links = [
+  { href: '/blog', label: t(lang, 'nav.blog') },
+  { href: '/notes', label: t(lang, 'nav.notes') },
+  { href: '/portfolio', label: t(lang, 'nav.portfolio') },
+  { href: '/about', label: t(lang, 'nav.about') },
+];
+
+const isActive = (href: string) => currentPath === href || currentPath.startsWith(`${href}/`);
+const codes = Object.keys(languages) as Lang[];
+---
+
+<header class="flex flex-wrap items-center justify-between gap-y-4 py-8 sm:py-10 print:hidden">
+  <a
+    href={localizePath('/', lang)}
+    class="font-medium tracking-tight text-fg transition-opacity hover:opacity-70"
+  >
+    rotiv
+  </a>
+
+  <nav
+    aria-label="Main"
+    class="order-last flex w-full items-center gap-2.5 text-sm sm:order-none sm:w-auto"
+  >
+    {
+      links.map((link, i) => (
+        <>
+          {i > 0 && <Sep />}
+          <a
+            href={localizePath(link.href, lang)}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class="text-muted transition-colors hover:text-fg aria-[current=page]:text-fg"
+          >
+            {link.label}
+          </a>
+        </>
+      ))
+    }
+  </nav>
+
+  <div class="flex items-center gap-3">
+    <div class="flex items-center gap-1.5 font-mono text-xs">
+      {
+        codes.map((code, i) => (
+          <>
+            {i > 0 && <Sep char="/" />}
+            <a
+              href={alternates[code] ?? localizePath(currentPath, code)}
+              hreflang={code}
+              aria-label={languages[code]}
+              aria-current={code === lang ? 'true' : undefined}
+              class="text-muted transition-colors hover:text-fg aria-[current=true]:text-fg"
+            >
+              {code}
+            </a>
+          </>
+        ))
+      }
+    </div>
+    <ThemeToggle lang={lang} />
+  </div>
+</header>

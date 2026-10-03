@@ -1,0 +1,116 @@
+---
+import { cv } from '../data/cv';
+import { defaultLang, languages, localizePath, stripLang, type Lang } from '../i18n/ui';
+
+export interface Article {
+  published: Date;
+  modified?: Date;
+  tags?: string[];
+}
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  /**
+   * Versões desta página em cada idioma (para o hreflang do Google).
+   * Padrão: a mesma rota nos dois idiomas. Posts passam só as traduções que existem.
+   */
+  translations?: Partial<Record<Lang, string>>;
+  /** Imagem de prévia (caminho em /public ou URL). */
+  image?: string;
+  article?: Article;
+  /** Dados estruturados extras (JSON-LD) */
+  schema?: Record<string, unknown>;
+}
+
+const { title, description, lang, image = '/og.png', article, schema } = Astro.props;
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+// Páginas são servidas como /rota/ (pasta + index.html): padroniza tudo com barra final
+const absolute = (path: string) => new URL(path.endsWith('/') ? path : `${path}/`, site).href;
+const canonical = absolute(Astro.url.pathname);
+const imageUrl = new URL(image, site).href;
+const locale = lang === 'pt' ? 'pt_BR' : 'en_US';
+
+const basePath = stripLang(Astro.url.pathname);
+const translations =
+  Astro.props.translations ??
+  Object.fromEntries((Object.keys(languages) as Lang[]).map((l) => [l, localizePath(basePath, l)]));
+const hreflangs = Object.entries(translations).map(([l, path]) => ({
+  hreflang: l === 'pt' ? 'pt-BR' : l,
+  href: absolute(path),
+}));
+const xDefault = translations[defaultLang];
+
+const person = {
+  '@type': 'Person',
+  name: cv.name,
+  alternateName: 'rotiv',
+  url: absolute('/'),
+  email: `mailto:${cv.contact.email}`,
+  jobTitle: cv.headline.en,
+  sameAs: [cv.contact.github, cv.contact.linkedin].filter(Boolean),
+};
+
+const jsonLd = schema ?? (
+  article
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: title,
+        description,
+        url: canonical,
+        image: imageUrl,
+        inLanguage: lang === 'pt' ? 'pt-BR' : 'en',
+        datePublished: article.published.toISOString(),
+        dateModified: (article.modified ?? article.published).toISOString(),
+        keywords: article.tags?.join(', '),
+        author: person,
+      }
+    : { '@context': 'https://schema.org', ...person }
+);
+---
+
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{hreflangs.map((h) => <link rel="alternate" hreflang={h.hreflang} href={h.href} />)}
+{xDefault && <link rel="alternate" hreflang="x-default" href={absolute(xDefault)} />}
+<link rel="sitemap" href="/sitemap-index.xml" />
+<meta name="author" content={cv.name} />
+
+<!-- Open Graph (WhatsApp, LinkedIn, Discord, Facebook…) -->
+<meta property="og:type" content={article ? 'article' : 'website'} />
+<meta property="og:site_name" content="rotiv" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={title} />
+<meta property="og:locale" content={locale} />
+{
+  (Object.keys(languages) as Lang[])
+    .filter((l) => l !== lang && translations[l])
+    .map((l) => <meta property="og:locale:alternate" content={l === 'pt' ? 'pt_BR' : 'en_US'} />)
+}
+{
+  article && (
+    <>
+      <meta property="article:published_time" content={article.published.toISOString()} />
+      {article.modified && (
+        <meta property="article:modified_time" content={article.modified.toISOString()} />
+      )}
+      {article.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+    </>
+  )
+}
+
+<!-- X / Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

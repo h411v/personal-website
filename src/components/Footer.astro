@@ -1,0 +1,35 @@
+---
+import Sep from './Sep.astro';
+import { cv } from '../data/cv';
+import { localizePath, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<footer
+  class="mt-24 flex flex-wrap items-center justify-between gap-4 border-t border-border py-8 font-mono text-xs text-muted print:hidden"
+>
+  <span>© {new Date().getFullYear()} rotiv</span>
+  <div class="flex items-center gap-2.5">
+    <a href={localizePath('/uses', lang)} class="transition-colors hover:text-fg">
+      {t(lang, 'nav.uses')}
+    </a>
+    <Sep />
+    <a
+      href={cv.contact.github}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="transition-colors hover:text-fg"
+    >
+      github ↗
+    </a>
+    <Sep />
+    <a href={localizePath('/rss.xml', lang)} class="transition-colors hover:text-fg">rss</a>
+    <Sep />
+    <a href="#top" class="transition-colors hover:text-fg">{t(lang, 'footer.top')} ↑</a>
+  </div>
+</footer>

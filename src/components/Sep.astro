@@ -1,0 +1,10 @@
+---
+// Separador decorativo: | por padrão, mas aceita outro símbolo (·, /, →)
+interface Props {
+  char?: string;
+}
+
+const { char = '|' } = Astro.props;
+---
+
+<span aria-hidden="true" class="select-none text-subtle">{char}</span>
