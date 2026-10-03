@@ -39,14 +39,14 @@ export interface Education {
 export const cv = {
   name: 'Vitor dos Santos Silva',
   headline: {
-    en: 'Software Developer · Computer Science student',
-    pt: 'Desenvolvedor de Software · Estudante de Ciência da Computação',
+    en: 'Full Stack Developer · Computer Science student',
+    pt: 'Desenvolvedor Full Stack · Estudante de Ciência da Computação',
   } satisfies Localized,
   location: { en: 'São Paulo, Brazil', pt: 'São Paulo, Brasil' } satisfies Localized,
 
   summary: {
-    en: "Programming since I was 13 and working as a developer since 2019, currently building enterprise management systems with SAPUI5, C# and MongoDB at BR GAAP, while studying Computer Science at UNIP. I like understanding how things work under the hood — that's why I run Arch Linux and spend my days in Neovim. Looking to keep growing as a software engineer on projects that solve real problems.",
-    pt: 'Programo desde os 13 anos e trabalho como desenvolvedor desde 2019, hoje construindo sistemas de gestão empresarial com SAPUI5, C# e MongoDB na BR GAAP, enquanto curso Ciência da Computação na UNIP. Gosto de entender como as coisas funcionam por dentro — por isso uso Arch Linux e passo meus dias no Neovim. Busco continuar crescendo como engenheiro de software em projetos que resolvem problemas reais.',
+    en: "Programming since I was 12 and working as a developer since 2019, currently building enterprise management systems with SAPUI5, C# and MongoDB at BR GAAP, while studying Computer Science at UNIP. I like understanding how things work under the hood — that's why I run Arch Linux and spend my days in Neovim. Looking to keep growing as a software engineer on projects that solve real problems.",
+    pt: 'Programo desde os 12 anos e trabalho como desenvolvedor desde 2019, hoje construindo sistemas de gestão empresarial com SAPUI5, C# e MongoDB na BR GAAP, enquanto curso Ciência da Computação na UNIP. Gosto de entender como as coisas funcionam por dentro — por isso uso Arch Linux e passo meus dias no Neovim. Busco continuar crescendo como engenheiro de software em projetos que resolvem problemas reais.',
   } satisfies Localized,
 
   contact: {
@@ -58,7 +58,7 @@ export const cv = {
 
   experience: [
     {
-      role: { en: 'Software Developer (cooperative member)', pt: 'Desenvolvedor de Software (cooperado)' },
+      role: { en: 'Full Stack Developer (cooperative member)', pt: 'Desenvolvedor Full Stack (cooperado)' },
       company: 'BR GAAP',
       start: '2026-03',
       end: null,
@@ -127,7 +127,7 @@ export const cv = {
   skills: [
     {
       label: { en: 'Languages', pt: 'Linguagens' },
-      items: ['TypeScript', 'JavaScript', 'C#', 'C', 'Ruby'],
+      items: ['Ruby', 'C#', 'C', 'TypeScript', 'JavaScript', 'Python', 'Julia', 'Lua'],
     },
     { label: { en: 'Frameworks & DB', pt: 'Frameworks e BD' }, items: ['SAPUI5', 'MongoDB'] },
     { label: { en: 'Tools', pt: 'Ferramentas' }, items: ['Linux (Arch)', 'Neovim', 'Git'] },

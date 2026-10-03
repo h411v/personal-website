@@ -28,8 +28,8 @@ export const profile = {
   },
 
   bio: {
-    en: `Hi, I'm Vitor — a ${age}-year-old software developer from São Paulo, Brazil. I've been programming since I was 13, and today I build enterprise systems at BR GAAP while studying Computer Science.`,
-    pt: `Oi, eu sou o Vitor — desenvolvedor de software de ${age} anos, de São Paulo. Programo desde os 13 e hoje construo sistemas empresariais na BR GAAP enquanto curso Ciência da Computação.`,
+    en: `Hi, I'm Vitor — a ${age}-year-old software developer from São Paulo, Brazil. I've been programming since I was 12, and today I build enterprise systems at BR GAAP while studying Computer Science.`,
+    pt: `Oi, eu sou o Vitor — desenvolvedor de software de ${age} anos, de São Paulo. Programo desde os 12 e hoje construo sistemas empresariais na BR GAAP enquanto curso Ciência da Computação.`,
   } satisfies Localized,
 
   // Aparecem como "rótulo  valor" em mono. Adicione/remova linhas livremente.
@@ -40,6 +40,11 @@ export const profile = {
     {
       label: { en: 'studying', pt: 'estudando' },
       value: { en: 'computer science', pt: 'ciência da computação' },
+    },
+    { label: { en: 'reading', pt: 'lendo' }, value: { en: 'how linux works', pt: 'how linux works' } },
+    {
+      label: { en: 'making', pt: 'fazendo' },
+      value: { en: 'a game · out jun 2027', pt: 'um jogo · sai em jun/2027' },
     },
     { label: { en: 'based in', pt: 'moro no' }, value: { en: 'brazil', pt: 'brasil' } },
   ] satisfies { label: Localized; value: Localized }[],

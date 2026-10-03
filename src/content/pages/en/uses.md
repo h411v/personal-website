@@ -22,4 +22,4 @@ A list of the things I use to work, study and tinker. Inspired by [uses.tech](ht
 ## Development
 
 - **Editor** — Neovim, with just a few plugins
-- **Languages I use the most** — TypeScript, C#, C, Ruby
+- **Languages I use the most** — Ruby, C#, C, TypeScript

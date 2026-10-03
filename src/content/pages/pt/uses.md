@@ -22,4 +22,4 @@ Uma lista das coisas que uso para trabalhar, estudar e mexer no computador. Insp
 ## Desenvolvimento
 
 - **Editor** — Neovim, com poucos plugins
-- **Linguagens que mais uso** — TypeScript, C#, C, Ruby
+- **Linguagens que mais uso** — Ruby, C#, C, TypeScript
