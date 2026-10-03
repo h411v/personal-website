@@ -57,6 +57,12 @@ export const ui = {
     'wip.notes.text': 'The notebook is open, but the pages are still blank. Quick notes will start showing up here soon.',
     'theme.toggle': 'Toggle theme',
     'footer.top': 'top',
+    'rss.description': 'Follow new posts from your feed reader.',
+    'rss.what': 'RSS is a simple way to follow sites without algorithms or social media: copy the address below into a feed reader and new posts show up there automatically.',
+    'rss.copy': 'copy',
+    'rss.copied': 'copied ✓',
+    'rss.readers': 'readers:',
+    'rss.raw': 'view the raw feed',
   },
   pt: {
     'nav.home': 'início',
@@ -107,6 +113,12 @@ export const ui = {
     'wip.notes.text': 'O caderno está aberto, mas as páginas ainda estão em branco. As notas rápidas começam a aparecer aqui em breve.',
     'theme.toggle': 'Alternar tema',
     'footer.top': 'topo',
+    'rss.description': 'Acompanhe os posts novos pelo seu leitor de RSS.',
+    'rss.what': 'RSS é um jeito simples de acompanhar sites sem algoritmo nem rede social: copie o endereço abaixo num leitor de RSS e os posts novos aparecem lá automaticamente.',
+    'rss.copy': 'copiar',
+    'rss.copied': 'copiado ✓',
+    'rss.readers': 'leitores:',
+    'rss.raw': 'ver o feed cru',
   },
 } as const;
 

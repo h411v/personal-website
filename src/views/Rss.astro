@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Sep from '../components/Sep.astro';
+import { localizePath, t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const feedUrl = new URL(localizePath('/rss.xml', lang), site).href;
+
+const readers = [
+  { name: 'Feedly', href: 'https://feedly.com' },
+  { name: 'Inoreader', href: 'https://www.inoreader.com' },
+  { name: 'NetNewsWire', href: 'https://netnewswire.com' },
+  { name: 'Newsboat', href: 'https://newsboat.org' },
+];
+---
+
+<BaseLayout lang={lang} title="RSS" description={t(lang, 'rss.description')}>
+  <PageHeader title="RSS" description={t(lang, 'rss.description')} />
+
+  <div class="space-y-5">
+    <p class="text-pretty">{t(lang, 'rss.what')}</p>
+
+    <div
+      class="flex items-center gap-2 rounded-lg border border-border bg-surface p-1.5 pl-4 font-mono text-[13px]"
+    >
+      <code class="min-w-0 flex-1 truncate text-fg">{feedUrl}</code>
+      <button
+        type="button"
+        data-copy={feedUrl}
+        data-copied={t(lang, 'rss.copied')}
+        class="shrink-0 rounded-md border border-border bg-bg px-3 py-1.5 text-xs text-muted transition-colors hover:text-fg"
+      >
+        {t(lang, 'rss.copy')}
+      </button>
+    </div>
+
+    <p class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs text-muted">
+      <span>{t(lang, 'rss.readers')}</span>
+      {
+        readers.map((r, i) => (
+          <>
+            {i > 0 && <Sep />}
+            <a
+              href={r.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="transition-colors hover:text-fg"
+            >
+              {r.name} ↗
+            </a>
+          </>
+        ))
+      }
+    </p>
+
+    <p class="pt-4 font-mono text-xs">
+      <a
+        href={localizePath('/rss.xml', lang)}
+        class="text-muted transition-colors hover:text-fg"
+      >
+        {t(lang, 'rss.raw')} →
+      </a>
+    </p>
+  </div>
+</BaseLayout>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-copy]');
+  button?.addEventListener('click', async () => {
+    const label = button.textContent;
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy ?? '');
+      button.textContent = button.dataset.copied ?? label;
+      setTimeout(() => (button.textContent = label), 1800);
+    } catch {
+      // Sem permissão de clipboard: a pessoa ainda pode selecionar o texto
+    }
+  });
+</script>
