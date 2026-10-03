@@ -1,0 +1,11 @@
+// Configuração do deploy na Cloudflare (Workers com arquivos estáticos).
+{
+  "name": "personal-website",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    // Pasta gerada pelo `npm run build`
+    "directory": "./dist",
+    // Página não encontrada: usa o 404.html mais próximo (/pt/... → pt/404.html)
+    "not_found_handling": "404-page"
+  }
+}
