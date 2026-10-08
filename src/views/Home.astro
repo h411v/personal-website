@@ -6,7 +6,7 @@ import Sep from '../components/Sep.astro';
 import NowPlaying from '../components/NowPlaying.astro';
 import DitherPlanet from '../components/DitherPlanet.astro';
 import { profile } from '../data/profile';
-import { getNotes, getPosts, postSlug } from '../lib/content';
+import { getNotes, getPosts, noteSlug, postSlug } from '../lib/content';
 import { formatDate, formatDay, formatTime } from '../lib/date';
 import { localizePath, t, type Lang } from '../i18n/ui';
 
@@ -17,7 +17,7 @@ interface Props {
 const { lang } = Astro.props;
 const posts = (await getPosts(lang)).slice(0, 5);
 const notes = await Promise.all(
-  (await getNotes())
+  (await getNotes(lang))
     .slice(0, 3)
     .map(async (note) => ({ note, Content: (await render(note)).Content })),
 );
@@ -98,7 +98,7 @@ const notes = await Promise.all(
           {notes.map(({ note, Content }) => (
             <li class="py-4 first:pt-1">
               <a
-                href={`${localizePath('/notes', lang)}#${note.id}`}
+                href={`${localizePath('/notes', lang)}#${noteSlug(note)}`}
                 class="flex items-center gap-2 font-mono text-xs text-muted transition-colors hover:text-fg"
               >
                 <time datetime={note.data.date.toISOString()}>{formatDay(note.data.date)}</time>

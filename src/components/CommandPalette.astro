@@ -1,7 +1,7 @@
 ---
 // Paleta de comandos (Ctrl+K / ⌘K / "/") + atalhos estilo Vim + ajuda ("?").
 import { cv } from '../data/cv';
-import { getNotes, getPosts, postSlug } from '../lib/content';
+import { getNotes, getPosts, noteSlug, postSlug } from '../lib/content';
 import { formatDate, formatDay } from '../lib/date';
 import { localizePath, t, type Lang, type UIKey } from '../i18n/ui';
 
@@ -62,11 +62,11 @@ const items: Item[] = [
     hint: formatDate(post.data.date),
     href: path(`/blog/${postSlug(post)}`),
   })),
-  ...(await getNotes()).map((note) => ({
+  ...(await getNotes(lang)).map((note) => ({
     group: 'notes' as const,
     label: clip(plain(note.body)),
     hint: formatDay(note.data.date),
-    href: `${path('/notes')}#${note.id}`,
+    href: `${path('/notes')}#${noteSlug(note)}`,
   })),
 ];
 

@@ -39,8 +39,13 @@ export function readingTime(text = ''): number {
   return Math.max(1, Math.round(words / 220));
 }
 
-export async function getNotes() {
-  const notes = await getCollection('notes');
+/** 'en/2026-10-08-1610' -> '2026-10-08-1610' (mesma âncora nos dois idiomas) */
+export function noteSlug(note: CollectionEntry<'notes'>): string {
+  return note.id.split('/').slice(1).join('/');
+}
+
+export async function getNotes(lang: Lang) {
+  const notes = await getCollection('notes', (note) => note.id.startsWith(`${lang}/`));
   return notes.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 

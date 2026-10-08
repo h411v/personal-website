@@ -17,7 +17,8 @@ const blog = defineCollection({
 });
 
 // Notas rápidas: só data/hora + texto solto, sem título.
-// Arquivos em src/content/notes/<qualquer-nome>.md
+// Arquivos em src/content/notes/<en|pt>/<qualquer-nome>.md
+// O mesmo nome de arquivo nos dois idiomas = tradução da mesma nota.
 const notes = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/notes' }),
   schema: z.object({
